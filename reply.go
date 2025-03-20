@@ -8,21 +8,33 @@ import (
 )
 
 func reply() {
-
 	scanner := bufio.NewScanner(os.Stdin)
+
+	urlConfig := config{
+		Next:     "https://pokeapi.co/api/v2/location-area/",
+		Previous: "0",
+	} // 다음, 이전 url 저장하는 구조체
+
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
+
+		// @@@ 해답처럼 길이가 0인 edgy case 처리
+		if len(cleaned) == 0 {
+			continue
+		}
+
 		command, ok := getCommands()[cleaned[0]]
 		if !ok {
 			fmt.Println("Unknown command")
+			continue // continue로 바로 다음 입력으로 넘어가게 하기 (if block 밖에 새로운 코드가 추가되도 실행되지 않고 다시 입력 단계로 가도록)
 		} else {
-			err := command.callback()
-			if err != nil {
+			if err := command.callback(&urlConfig); err != nil {
 				fmt.Println(err)
 			}
+			continue
 		}
 	}
 }
@@ -48,7 +60,12 @@ func cleanInput(text string) []string {
 type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 정보 저장
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
+}
+
+type config struct {
+	Next     string
+	Previous string
 }
 
 // commandMap := map[string]cliCommand{ // @@@ :=는 함수 안에서만 사용 가능
@@ -77,5 +94,18 @@ func getCommands() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays next 20 location areas in the Pokemon world",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays previous 20 location areas in the Pokemon world",
+			callback:    commandMapBack,
+		},
 	}
 }
+
+// @@@ 함수 정의 자체는 반환하는 map을 초기화하지 않는다
+// @@@ ==> getCommands함수가 정의될 때 help의 callback commandHelp의 정의가 필요하지 않으므로 문제 해결
