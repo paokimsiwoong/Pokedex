@@ -1,3 +1,5 @@
 poke/
 __pycache__/
 *.ipynb
+Pokedex
+*.log
