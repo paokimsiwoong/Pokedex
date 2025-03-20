@@ -7,32 +7,7 @@ import (
 	"strings"
 )
 
-type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 정보 저장
-	name        string
-	description string
-	callback    func() error
-}
-
-// commandMap := map[string]cliCommand{ // @@@ :=는 함수 안에서만 사용 가능
-var commandMap map[string]cliCommand = map[string]cliCommand{
-	"exit": {
-		name:        "exit",
-		description: "Exit the Pokedex",
-		callback:    commandExit,
-	},
-	// "help": {
-	// 	name:        "help",
-	// 	description: "Displays a help message",
-	// 	callback:    commandHelp,
-	// }, commandHelp 안에 commanMap이 쓰이고 그 commandMap 안에 commandHelp가 있음 : initialization cycle for commandMap
-}
-
 func reply() {
-	commandMap["help"] = cliCommand{
-		name:        "help",
-		description: "Displays a help message",
-		callback:    commandHelp,
-	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -40,7 +15,7 @@ func reply() {
 		scanner.Scan()
 		input := scanner.Text()
 		cleaned := cleanInput(input)
-		command, ok := commandMap[cleaned[0]]
+		command, ok := getCommands()[cleaned[0]]
 		if !ok {
 			fmt.Println("Unknown command")
 		} else {
@@ -70,19 +45,37 @@ func cleanInput(text string) []string {
 	return split
 }
 
-func commandExit() error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0) // 프로그램 종료
-	return nil
+type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 정보 저장
+	name        string
+	description string
+	callback    func() error
 }
 
-func commandHelp() error {
-	fmt.Println("Welcome to the Pokedex!")
-	fmt.Println("Usage:")
-	fmt.Println("")
-	for _, command := range commandMap {
-		fmt.Printf("%s: %s\n", command.name, command.description)
-	}
+// commandMap := map[string]cliCommand{ // @@@ :=는 함수 안에서만 사용 가능
+// var commandMap map[string]cliCommand = map[string]cliCommand{
+// 	"exit": {
+// 		name:        "exit",
+// 		description: "Exit the Pokedex",
+// 		callback:    commandExit,
+// 	},
+// 	"help": {
+// 		name:        "help",
+// 		description: "Displays a help message",
+// 		callback:    commandHelp,
+// 	}, // commandHelp 안에 commanMap이 쓰이고 그 commandMap 안에 commandHelp가 있음 : initialization cycle for commandMap
+// }
 
-	return nil
+func getCommands() map[string]cliCommand {
+	return map[string]cliCommand{
+		"exit": {
+			name:        "exit",
+			description: "Exit the Pokedex",
+			callback:    commandExit,
+		},
+		"help": {
+			name:        "help",
+			description: "Displays a help message",
+			callback:    commandHelp,
+		},
+	}
 }
