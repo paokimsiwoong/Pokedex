@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/paokimsiwoong/Pokedex/internal/pokeapi"
 )
 
-func reply() {
-	scanner := bufio.NewScanner(os.Stdin)
+type config struct {
+	Next     string
+	Previous string
+	client   pokeapi.Client
+}
 
-	urlConfig := config{
-		Next:     "https://pokeapi.co/api/v2/location-area/",
-		Previous: "0",
-	} // 다음, 이전 url 저장하는 구조체
+func reply(configptr *config) {
+	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -31,7 +34,7 @@ func reply() {
 			fmt.Println("Unknown command")
 			continue // continue로 바로 다음 입력으로 넘어가게 하기 (if block 밖에 새로운 코드가 추가되도 실행되지 않고 다시 입력 단계로 가도록)
 		} else {
-			if err := command.callback(&urlConfig); err != nil {
+			if err := command.callback(configptr); err != nil {
 				fmt.Println(err)
 			}
 			continue
@@ -61,11 +64,6 @@ type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 �
 	name        string
 	description string
 	callback    func(*config) error
-}
-
-type config struct {
-	Next     string
-	Previous string
 }
 
 // commandMap := map[string]cliCommand{ // @@@ :=는 함수 안에서만 사용 가능
