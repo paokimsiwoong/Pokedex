@@ -13,6 +13,13 @@ type config struct {
 	Next     string
 	Previous string
 	client   pokeapi.Client
+	pokedex  map[string]pokeapi.PokemonData
+}
+
+type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 정보 저장
+	name        string
+	description string
+	callback    func(*config, ...string) error
 }
 
 func reply(configptr *config) {
@@ -34,7 +41,7 @@ func reply(configptr *config) {
 			fmt.Println("Unknown command")
 			continue // continue로 바로 다음 입력으로 넘어가게 하기 (if block 밖에 새로운 코드가 추가되도 실행되지 않고 다시 입력 단계로 가도록)
 		} else {
-			if err := command.callback(configptr); err != nil {
+			if err := command.callback(configptr, cleaned[1:]...); err != nil {
 				fmt.Println(err)
 			}
 			continue
@@ -58,12 +65,6 @@ func cleanInput(text string) []string {
 	// @@@ https://pkg.go.dev/strings#Split
 
 	return split
-}
-
-type cliCommand struct { // cli 명령어들은 각각 cliCommand 구조체에 정보 저장
-	name        string
-	description string
-	callback    func(*config) error
 }
 
 // commandMap := map[string]cliCommand{ // @@@ :=는 함수 안에서만 사용 가능
@@ -102,6 +103,21 @@ func getCommands() map[string]cliCommand {
 			description: "Displays previous 20 location areas in the Pokemon world",
 			callback:    commandMapBack,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Displays a list of all the Pokemons in the area. It takes the name of a location as an argument",
+			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Try to catch a Pokemon. It takes the name of a Pokemon as an argument",
+			callback:    commandCatch,
+		},
+		// "inspect": {
+		// 	name:        "inspect",
+		// 	description: "Prints the name, height, weight, stats, and type(s) of the Pokemon. It takes the name of a Pokemon as an argument",
+		// 	callback:    commandInspect,
+		// },
 	}
 }
 

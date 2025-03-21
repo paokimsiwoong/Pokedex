@@ -9,6 +9,7 @@ import (
 type Cache struct {
 	entries map[string]cacheEntry
 	mu      *sync.RWMutex
+	// current string // 현재 페이지의 url(entries의 key) 저장
 }
 
 // 데이터 entry 한개 저장할 구조체
@@ -51,6 +52,7 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 	// 	return []byte{}, false
 	// }
 	// @@@ 해답 코드 반영: ok가 false일때(map에 해당 키가 없을 때) value 타입의 zero 값을 반환하므로 그대로 사용해도 된다
+
 	return entry.val, ok
 }
 
@@ -64,9 +66,22 @@ func (c *Cache) reapLoop(ticker <-chan time.Time, interval time.Duration) {
 				// entry.createdAt.Before(timestamp.Add(-interval))
 				// func (t time.Time) Before(u time.Time) bool
 				// Before reports whether the time instant t is before u
+				// if key == c.current { // 현재 페이지인 경우 삭제 제외
+				// 	continue
+				// }
 				delete(c.entries, key)
 			}
 		}
 		c.mu.Unlock()
 	}
 }
+
+// // Cache의 current 필드 설정 메소드
+// func (c *Cache) SetCurrent(url string) {
+// 	c.current = url
+// }
+
+// // Cache의 current 필드 접근 메소드
+// func (c *Cache) GetCurrent() string {
+// 	return c.current
+// }
