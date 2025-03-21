@@ -141,21 +141,47 @@ func commandCatch(configptr *config, args ...string) error {
 }
 
 // inspect 명령어
-// func commandInspect(configptr *config, args ...string) error {
-// 	// @@@ 해답처럼 명령어가 잘못 들어올 경우 예외 처리
-// 	if len(args) != 1 {
-// 		return errors.New("wrong command : try catch <PokemonName>")
-// 	}
+func commandInspect(configptr *config, args ...string) error {
+	// @@@ 해답처럼 명령어가 잘못 들어올 경우 예외 처리
+	if len(args) != 1 {
+		return errors.New("wrong command : try inspect <PokemonName>")
+	}
 
-// 	pokemonName := args[0]
+	pokemonName := args[0]
 
-// 	pokemonData, ok := configptr.pokedex[pokemonName]
+	pokemonData, ok := configptr.pokedex[pokemonName]
 
-// 	if !ok {
-// 		fmt.Printf("You have not caught %s\n", pokemonName)
-// 	} else {
-// 		fmt.Printf("Name: %s\n", pokemonData.Name)
-// 	}
+	if !ok {
+		fmt.Printf("You have not caught %s\n", pokemonName)
+	} else {
+		fmt.Printf("Name: %s\n", pokemonData.Name)
+		fmt.Printf("Height: %d\n", pokemonData.Height)
+		fmt.Printf("Weight: %d\n", pokemonData.Weight)
 
-// 	return nil
-// }
+		fmt.Println("Stats:")
+		for _, stat := range pokemonData.Stats {
+			fmt.Printf(" - %v: %v\n", stat.Stat.Name, stat.BaseStat)
+		}
+
+		fmt.Println("Types:")
+		for _, t := range pokemonData.Types { // @@@ type은 예약어이므로 피하기
+			fmt.Printf(" - %s\n", t.Type.Name)
+		}
+	}
+
+	return nil
+}
+
+func commandPokeDEX(configptr *config, args ...string) error {
+	fmt.Println("Your Pokedex:")
+
+	count := 0
+
+	for key := range configptr.pokedex {
+		fmt.Printf(" - %v\n", key)
+		count++
+	}
+	fmt.Printf("You've caught %d Pokemon so far.\n", count)
+
+	return nil
+}
