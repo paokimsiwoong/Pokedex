@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	newClient := pokeapi.NewClient(5 * time.Second) // 연결에 5초 이상 걸리면 timeout
+	newClient := pokeapi.NewClient(5*time.Second, 5*time.Second) // 첫번째 인자: 연결에 5초 이상 걸리면 timeout, 두번째 인자: cache 저장 시간
 	configptr := &config{
 		Next:     "next",
 		Previous: "prev",
